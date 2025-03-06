@@ -1,6 +1,6 @@
 ﻿namespace CleanArchitecture_2025.Domain.Abstractions;
 
-public abstract class EntityDto
+public abstract class EntityDto : IAuditLog
 {
     public Guid Id { get; set; }
     public bool IsActive { get; set; }

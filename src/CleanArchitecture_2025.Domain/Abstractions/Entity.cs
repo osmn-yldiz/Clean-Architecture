@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CleanArchitecture_2025.Domain.Abstractions;
 
-public abstract class Entity
+public abstract class Entity : IAuditLog
 {
     public Entity()
     {
