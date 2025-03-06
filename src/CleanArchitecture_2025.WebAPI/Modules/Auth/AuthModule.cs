@@ -15,11 +15,12 @@ public static class AuthModule
             {
                 if (request is null)
                 {
-                    return Results.BadRequest("Request cannot be null.");
+                    //throw new ProblemException("Bad Request", "İstek boş olamaz.");
+                    return Results.BadRequest(new { Message = "İstek boş olamaz." });
                 }
 
                 var response = await sender.Send(request, cancellationToken);
-                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+                return response.IsSuccessful ? Results.Ok(response) : Results.BadRequest(response);
             })
             .Produces<Result<LoginCommandResponse>>()
             .WithName("login");

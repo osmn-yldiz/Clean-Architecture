@@ -1,9 +1,11 @@
 using CleanArchitecture_2025.Application;
+using CleanArchitecture_2025.Application.Behaviors;
 using CleanArchitecture_2025.Infrastructure;
 using CleanArchitecture_2025.WebAPI.Controllers;
 using CleanArchitecture_2025.WebAPI.Middlewares;
 using CleanArchitecture_2025.WebAPI.Modules;
 using HealthChecks.UI.Client;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.OData;
@@ -11,6 +13,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -59,8 +62,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
+}).AddJwtBearer(options =>
     {
         options.RequireHttpsMetadata = false;
         options.SaveToken = true;
@@ -89,6 +91,11 @@ builder.Services.AddCors(options =>
         .SetIsOriginAllowed(t => true);
     });
 });
+
+// Serilog
+builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
 
 // Keycloak Ýþlemleri
 //builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration);
@@ -148,6 +155,8 @@ app.UseExceptionHandler();
 app.MapControllers().RequireRateLimiting("fixed").RequireAuthorization();
 
 ExtensionsMiddleware.CreateFirstUser(app);
+
+app.UseSerilogRequestLogging(); // HTTP request loglarý için
 
 app.MapHealthChecks("/health-check", new HealthCheckOptions
 {

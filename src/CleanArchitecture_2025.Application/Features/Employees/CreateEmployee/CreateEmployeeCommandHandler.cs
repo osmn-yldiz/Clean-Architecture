@@ -1,4 +1,5 @@
-﻿using CleanArchitecture_2025.Domain.Entities;
+﻿using CleanArchitecture_2025.Application.Services;
+using CleanArchitecture_2025.Domain.Entities;
 using CleanArchitecture_2025.Domain.Repositories;
 using GenericRepository;
 using Mapster;
@@ -9,7 +10,8 @@ namespace CleanArchitecture_2025.Application.Features.Employees.CreateEmployee;
 
 internal sealed class CreateEmployeeCommandHandler(
     IEmployeeRepository employeeRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateEmployeeCommand, Result<string>>
+    IUnitOfWork unitOfWork,
+    ICacheService cacheService) : IRequestHandler<CreateEmployeeCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
     {
@@ -23,6 +25,8 @@ internal sealed class CreateEmployeeCommandHandler(
 
         employeeRepository.Add(employee);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        cacheService.Remove("employees");
 
         return "Personel kaydı başarıyla kaydedildi.";
     }

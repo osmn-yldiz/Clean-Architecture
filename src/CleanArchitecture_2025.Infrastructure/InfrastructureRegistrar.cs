@@ -1,6 +1,8 @@
-﻿using CleanArchitecture_2025.Domain.Entities;
+﻿using CleanArchitecture_2025.Application.Services;
+using CleanArchitecture_2025.Domain.Entities;
 using CleanArchitecture_2025.Infrastructure.Context;
 using CleanArchitecture_2025.Infrastructure.Options;
+using CleanArchitecture_2025.Infrastructure.Services;
 using GenericRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,9 @@ public static class InfrastructureRegistrar
         });
 
         services.AddScoped<IUnitOfWork>(srv => srv.GetRequiredService<ApplicationDbContext>());
+
+        services.AddMemoryCache();
+        services.AddScoped<ICacheService, MemoryCacheService>();
 
         services
             .AddIdentity<AppUser, IdentityRole<Guid>>(cfr =>

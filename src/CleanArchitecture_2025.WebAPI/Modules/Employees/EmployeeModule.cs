@@ -18,8 +18,14 @@ public static class EmployeeModule
         group.MapGet("{id}",
             async (Guid id, ISender sender, CancellationToken cancellationToken) =>
             {
+                if (id == Guid.Empty)
+                {
+                    //throw new ProblemException("Bad Request", "Geçersiz Guid değeri sağlandı.");
+                    return Results.BadRequest(new { Message = "Geçersiz Guid değeri sağlandı." });
+                }
+
                 var response = await sender.Send(new GetByIdEmployeeQuery(id), cancellationToken);
-                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+                return response.IsSuccessful ? Results.Ok(response) : Results.BadRequest(response);
             })
             .Produces<Result<Employee>>()
             .WithName("GetById");
@@ -30,11 +36,12 @@ public static class EmployeeModule
             {
                 if (request is null)
                 {
-                    return Results.BadRequest("Request cannot be null.");
+                    //throw new ProblemException("Bad Request", "İstek boş olamaz.");
+                    return Results.BadRequest(new { Message = "İstek boş olamaz." });
                 }
 
                 var response = await sender.Send(request, cancellationToken);
-                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+                return response.IsSuccessful ? Results.Ok(response) : Results.BadRequest(response);
             })
             .Produces<Result<string>>()
             .WithName("Create");
@@ -43,18 +50,30 @@ public static class EmployeeModule
         group.MapPut(string.Empty,
             async (ISender sender, UpdateEmployeeCommand request, CancellationToken cancellationToken) =>
             {
+                if (request is null)
+                {
+                    //throw new ProblemException("Bad Request", "İstek boş olamaz.");
+                    return Results.BadRequest(new { Message = "İstek boş olamaz." });
+                }
+
                 var response = await sender.Send(request, cancellationToken);
-                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+                return response.IsSuccessful ? Results.Ok(response) : Results.BadRequest(response);
             })
-            .Produces<Result<string>>(StatusCodes.Status200OK)
+            .Produces<Result<string>>()
             .WithName("Update");
 
         // Delete Employee
         group.MapDelete("{id}",
             async (Guid id, ISender sender, CancellationToken cancellationToken) =>
             {
+                if (id == Guid.Empty)
+                {
+                    //throw new ProblemException("Bad Request", "Geçersiz Guid değeri sağlandı.");
+                    return Results.BadRequest(new { Message = "Geçersiz Guid değeri sağlandı." });
+                }
+
                 var response = await sender.Send(new DeleteEmployeeByIdCommand(id), cancellationToken);
-                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+                return response.IsSuccessful ? Results.Ok(response) : Results.BadRequest(response);
             })
             .Produces<Result<string>>()
             .WithName("Delete");

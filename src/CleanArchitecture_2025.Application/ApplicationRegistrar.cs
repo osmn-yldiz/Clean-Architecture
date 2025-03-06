@@ -1,4 +1,5 @@
 ﻿using CleanArchitecture_2025.Application.Behaviors;
+using CleanArchitecture_2025.Domain.Entities;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +12,9 @@ public static class ApplicationRegistrar
 
         services.AddMediatR(configuration =>
         {
-            configuration.RegisterServicesFromAssembly(typeof(ApplicationRegistrar).Assembly);
+            configuration.RegisterServicesFromAssemblies(
+                typeof(ApplicationRegistrar).Assembly,
+                typeof(AppUser).Assembly); ;
             configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 

@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
+using TS.Result;
 
 namespace CleanArchitecture_2025.Application.Behaviors;
 
-public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : class, IRequest<TResponse>
+public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, Result<TResponse>>
+        where TRequest : class, IRequest<Result<TResponse>>
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -14,7 +14,7 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         _validators = validators;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<Result<TResponse>> Handle(TRequest request, RequestHandlerDelegate<Result<TResponse>> next, CancellationToken cancellationToken)
     {
         if (!_validators.Any())
         {
@@ -38,12 +38,10 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
 
         if (errorDictionary.Any())
         {
-            var errors = errorDictionary.Select(s => new ValidationFailure
-            {
-                PropertyName = s.Value,
-                ErrorCode = s.Key
-            });
-            throw new ValidationException(errors);
+            var errors = errorDictionary
+                 .Select(s => $"{s.Key}: {s.Value}")
+                 .ToList();
+            return Result<TResponse>.Failure(400, errors);
         }
 
         return await next();
