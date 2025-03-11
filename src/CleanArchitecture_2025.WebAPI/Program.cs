@@ -88,7 +88,8 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials()
-        .SetIsOriginAllowed(t => true);
+        .SetIsOriginAllowed(t => true)
+        .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
     });
 });
 
